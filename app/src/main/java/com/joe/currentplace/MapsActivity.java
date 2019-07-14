@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -178,6 +181,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     if (i > (count - 1))
                         break;
+
+                    fillPlacesList();
                 }
             } else {
                 Exception exception = task.getException();
@@ -230,6 +235,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             getLocationPermission();
         }
+    }
+
+    private AdapterView.OnItemClickListener listClickedHandler = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            LatLng markerLatLng = likelyPlaceLatLngs[position];
+            String markerSnippet = likelyPlaceAddresses[position];
+            if (likelyPlaceAttributions[position] != null)
+                markerSnippet = markerSnippet + "\n" + likelyPlaceAttributions[position];
+
+            mMap.addMarker(new MarkerOptions()
+                    .title(likelyPlaceNames[position])
+                    .position(markerLatLng)
+                    .snippet(markerSnippet)
+            );
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(markerLatLng));
+        }
+    };
+
+    private void fillPlacesList() {
+        ArrayAdapter<String> placesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, likelyPlaceNames);
+        listPlaces.setAdapter(placesAdapter);
+        listPlaces.setOnItemClickListener(listClickedHandler);
     }
 
 }
